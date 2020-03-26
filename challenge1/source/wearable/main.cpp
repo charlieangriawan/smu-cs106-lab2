@@ -6,7 +6,7 @@ int main()
 {
     uBit.init();
 
-    uBit.display.scroll("CHALLENGE 1!");
+    uBit.display.scroll("WEARABLE!");
 
     release_fiber();
 }

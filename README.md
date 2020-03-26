@@ -34,22 +34,14 @@ stops walking.
 
 1. Install [`yotta`](http://docs.yottabuild.org/#installing) and `srecord` [[windows]](http://srecord.sourceforge.net/) [[ubuntu]](https://packages.ubuntu.com/bionic/srecord)
 
-2. Build project dependencies:
+2. Run project:
 
-```
-> cd PROJECT_FOLDER
-> yt target bbc-microbit-classic-gcc
-> yt build
-```
-
-3. Copy hex file to micro:bit:
-
-```
-> cp build/bbc-microbit-classic-gcc/source/[PROJECT_FOLDER]-combined.hex [MICROBIT_PATH]
-```
+Run `./flash.sh challenge{num} {module} {microbit_path}`
 
 Example (Ubuntu):
 
-```
-> cp build/bbc-microbit-classic-gcc/source/cs102-lab2-challenge1-combined.hex /media/charlie/MICROBIT1
+```bash
+$ ./flash.sh challenge2 walker /media/charlie/MICROBIT1
+$ ./flash.sh challenge1 gateway /media/charlie/MICROBIT1
+$ ./flash.sh challenge1 lightsensor /media/charlie/MICROBIT2
 ```
