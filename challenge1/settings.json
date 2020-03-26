@@ -1,10 +1,9 @@
 {
-    "name": "cs102-lab2-challenge1",
+    "name": "cs106-lab2-challenge1",
     "version": "1.0.0",
     "description": "cs106 embedded systems lab 2 challenge 1",
     "license": "MIT",
     "dependencies": {
-      "microbit": "lancaster-university/microbit#v2.1.1"
-    },
-    "bin": "./source"
-  }
+        "microbit": "lancaster-university/microbit#v2.1.1"
+    }
+}
