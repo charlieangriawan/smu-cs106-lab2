@@ -1,7 +1,7 @@
 #include "MicroBit.h"
 
 // Microbit global variables
-int MICROBIT_SLEEP_INTERVAL = 10;
+int MICROBIT_SLEEP_INTERVAL = 1000;
 
 // Radio communications
 #define DEVICE_WEARABLE                 9701

@@ -1,7 +1,7 @@
 #include "MicroBit.h"
 
 // Microbit global variables
-int MICROBIT_SLEEP_INTERVAL = 10;
+int MICROBIT_SLEEP_INTERVAL = 1000;
 
 // Radio communications
 #define DEVICE_WEARABLE                 9701
@@ -14,8 +14,19 @@ void wearable_onHelpRequest(MicroBitEvent);
 void wearable_onHelpCancelation(MicroBitEvent);
 void wearable_onMotionDetected(MicroBitEvent);
 
+// State global variables
+bool IS_NIGHT = false;
+bool HELP_REQUESTED = false;
+bool MOTION_DETECTED = false;
+int MOTION_UNDETECTED_CYCLECOUNT = 0;
+MicroBitImage ICON_HELP("255,255,0,255,255\n0,255,0,255,0\n0,0,0,0,0\n0,255,255,255,0\n255,0,0,0,255\n");
+MicroBitImage ICON_INACTIVE("0,255,0,255,0\n0,255,0,255,0\n0,255,0,255,0\n0,0,0,0,0\n0,255,0,255,0\n");
+
 MicroBit uBit;
 
+void processStateUpdate();
+
+clock_t startTime;
 int main()
 {
     uBit.init();
@@ -28,25 +39,51 @@ int main()
     uBit.messageBus.listen(DEVICE_WEARABLE, WEARABLE_EVT_HELP_OFF, wearable_onHelpCancelation);
     uBit.messageBus.listen(DEVICE_WEARABLE, WEARABLE_EVT_SHAKE_DETECTED, wearable_onMotionDetected);
 
-    uBit.display.print("G");
     while (true) {
+        startTime = clock();
+        processStateUpdate();
         uBit.sleep(MICROBIT_SLEEP_INTERVAL);
+        MOTION_UNDETECTED_CYCLECOUNT++;
     }
 }
 
-void lightSensor_onData(MicroBitEvent e) {
+void _displayIcons(bool help, bool inactive) {
+    if (help) {
+        uBit.display.print(ICON_HELP);
+        uBit.sleep(MICROBIT_SLEEP_INTERVAL/2);
+    } if (inactive) {
+        uBit.display.print(ICON_INACTIVE);
+    }
+}
+
+void processStateUpdate() {
+
+    bool help = false, inactive = false;
+    if (HELP_REQUESTED) {
+        help = true;
+        if (MOTION_UNDETECTED_CYCLECOUNT > 5) inactive = true;
+    } else uBit.display.clear();
+    if (!IS_NIGHT && MOTION_UNDETECTED_CYCLECOUNT > 600) inactive = true;
+    _displayIcons(help, inactive);
+}
+
+void lightSensor_onData(MicroBitEvent) {
     PacketBuffer buffer = uBit.radio.datagram.recv();
-    uBit.serial.printf("%d ", buffer[0]);
+    unsigned char lightLevel = buffer[0];
+
+    if (lightLevel > 128) IS_NIGHT = false;
+    else IS_NIGHT = true;
 }
 
-void wearable_onHelpRequest(MicroBitEvent e) {
-    uBit.serial.printf("help requested ");
+void wearable_onHelpRequest(MicroBitEvent) {
+    HELP_REQUESTED = true;
 }
 
-void wearable_onHelpCancelation(MicroBitEvent e) {
-    uBit.serial.printf("help request canceled ");
+void wearable_onHelpCancelation(MicroBitEvent) {
+    HELP_REQUESTED = false;
 }
 
-void wearable_onMotionDetected(MicroBitEvent e) {
-    uBit.serial.printf("motion detected ");
+void wearable_onMotionDetected(MicroBitEvent) {
+    MOTION_DETECTED = true;
+    MOTION_UNDETECTED_CYCLECOUNT = 0;
 }
