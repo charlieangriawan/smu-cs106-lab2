@@ -1,7 +1,11 @@
 #include "MicroBit.h"
 
-// Microbit global variables
+// Microbit final global variables
 int MICROBIT_SLEEP_INTERVAL = 1000;
+int LIGHTLEVEL_TRESHOLD = 128;
+int INACTIVITY_TRESHOLD = 600;
+MicroBitImage ICON_HELP("255,255,0,255,255\n0,255,0,255,0\n0,0,0,0,0\n0,255,255,255,0\n255,0,0,0,255\n");
+MicroBitImage ICON_INACTIVE("0,255,0,255,0\n0,255,0,255,0\n0,255,0,255,0\n0,0,0,0,0\n0,255,0,255,0\n");
 
 // Radio communications
 #define DEVICE_WEARABLE                 9701
@@ -19,14 +23,11 @@ bool IS_NIGHT = false;
 bool HELP_REQUESTED = false;
 bool MOTION_DETECTED = false;
 int MOTION_UNDETECTED_CYCLECOUNT = 0;
-MicroBitImage ICON_HELP("255,255,0,255,255\n0,255,0,255,0\n0,0,0,0,0\n0,255,255,255,0\n255,0,0,0,255\n");
-MicroBitImage ICON_INACTIVE("0,255,0,255,0\n0,255,0,255,0\n0,255,0,255,0\n0,0,0,0,0\n0,255,0,255,0\n");
 
 MicroBit uBit;
 
 void processStateUpdate();
 
-clock_t startTime;
 int main()
 {
     uBit.init();
@@ -40,7 +41,6 @@ int main()
     uBit.messageBus.listen(DEVICE_WEARABLE, WEARABLE_EVT_SHAKE_DETECTED, wearable_onMotionDetected);
 
     while (true) {
-        startTime = clock();
         processStateUpdate();
         uBit.sleep(MICROBIT_SLEEP_INTERVAL);
         MOTION_UNDETECTED_CYCLECOUNT++;
@@ -57,13 +57,12 @@ void _displayIcons(bool help, bool inactive) {
 }
 
 void processStateUpdate() {
-
     bool help = false, inactive = false;
     if (HELP_REQUESTED) {
         help = true;
         if (MOTION_UNDETECTED_CYCLECOUNT > 5) inactive = true;
     } else uBit.display.clear();
-    if (!IS_NIGHT && MOTION_UNDETECTED_CYCLECOUNT > 600) inactive = true;
+    if (!IS_NIGHT && MOTION_UNDETECTED_CYCLECOUNT > INACTIVITY_TRESHOLD) inactive = true;
     _displayIcons(help, inactive);
 }
 
@@ -71,7 +70,7 @@ void lightSensor_onData(MicroBitEvent) {
     PacketBuffer buffer = uBit.radio.datagram.recv();
     unsigned char lightLevel = buffer[0];
 
-    if (lightLevel > 128) IS_NIGHT = false;
+    if (lightLevel > LIGHTLEVEL_TRESHOLD) IS_NIGHT = false;
     else IS_NIGHT = true;
 }
 
