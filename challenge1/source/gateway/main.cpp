@@ -9,6 +9,7 @@ int MICROBIT_SLEEP_INTERVAL = 10;
 #define WEARABLE_EVT_HELP_OFF           2
 #define WEARABLE_EVT_SHAKE_DETECTED     3
 
+void lightSensor_onData(MicroBitEvent);
 void wearable_onHelpRequest(MicroBitEvent);
 void wearable_onHelpCancelation(MicroBitEvent);
 void wearable_onMotionDetected(MicroBitEvent);
@@ -21,6 +22,8 @@ int main()
 
     uBit.radio.enable();
 
+    uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, lightSensor_onData);
+
     uBit.messageBus.listen(DEVICE_WEARABLE, WEARABLE_EVT_HELP_ON, wearable_onHelpRequest);
     uBit.messageBus.listen(DEVICE_WEARABLE, WEARABLE_EVT_HELP_OFF, wearable_onHelpCancelation);
     uBit.messageBus.listen(DEVICE_WEARABLE, WEARABLE_EVT_SHAKE_DETECTED, wearable_onMotionDetected);
@@ -29,6 +32,11 @@ int main()
     while (true) {
         uBit.sleep(MICROBIT_SLEEP_INTERVAL);
     }
+}
+
+void lightSensor_onData(MicroBitEvent e) {
+    PacketBuffer buffer = uBit.radio.datagram.recv();
+    uBit.serial.printf("%d ", buffer[0]);
 }
 
 void wearable_onHelpRequest(MicroBitEvent e) {
