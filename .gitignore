@@ -1,3 +1,5 @@
+.vscode
 build
 *yotta*
 *module.json
+debug.sh
