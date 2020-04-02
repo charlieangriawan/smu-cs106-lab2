@@ -12,8 +12,8 @@ int RADIO_CHANNEL_1 = 101;
 int RADIO_CHANNEL_2 = 202;
 
 void onDataChannel1(MicroBitEvent);
-void decrementInterval(MicrobitEvent);
-void incrementInterval(MicrobitEvent);
+void decrementInterval(MicroBitEvent);
+void incrementInterval(MicroBitEvent);
 
 void broadcastBaseSignal();
 void sendFluxData();
@@ -62,12 +62,12 @@ void onDataChannel1(MicroBitEvent) {
     // uBit.serial.printf("%d\r\n", SIGNALER_MEMBER_COUNT);
 }
 
-void decrementInterval(MicrobitEvent) {
+void decrementInterval(MicroBitEvent) {
     MICROBIT_SLEEP_INTERVAL -= 50;
     uBit.display.scroll(MICROBIT_SLEEP_INTERVAL);
 }
 
-void incrementInterval(MicrobitEvent) {
+void incrementInterval(MicroBitEvent) {
     MICROBIT_SLEEP_INTERVAL += 50;
     uBit.display.scroll(MICROBIT_SLEEP_INTERVAL);
 }
