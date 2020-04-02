@@ -4,7 +4,7 @@
 int const MICROBIT_SLEEP_INTERVAL = 500;
 
 int TOTAL_SIGNAL_STRENGTH = 0;
-int SIGNALER_MEMBER_COUNT = 0;
+int SIGNALER_COUNT = 0;
 
 int PREV_AVG_SIGNAL_STRENGTH = 0;
 
@@ -34,7 +34,7 @@ int main()
     uBit.display.print("M");
 
     while (true) {
-        SIGNALER_MEMBER_COUNT = 0;
+        SIGNALER_COUNT = 0;
         TOTAL_SIGNAL_STRENGTH = 0;
 
         uBit.sleep(MICROBIT_SLEEP_INTERVAL);
@@ -53,7 +53,7 @@ void onDataChannel1(MicroBitEvent) {
     int signalStrength =  128 + buffer.getRSSI();
 
     TOTAL_SIGNAL_STRENGTH += signalStrength;
-    SIGNALER_MEMBER_COUNT++;
+    SIGNALER_COUNT++;
 
     // uBit.serial.printf("%d\r\n", SIGNALER_MEMBER_COUNT);
 }
@@ -62,7 +62,7 @@ void broadcastBaseSignal() {
 
     PacketBuffer buffer(1);
 
-    buffer[0] = 0; 
+    buffer[0] = 0;
     uBit.radio.datagram.send(buffer);
 }
 
@@ -72,7 +72,7 @@ void sendFluxData() {
     PacketBuffer buffer(1);
 
     // increase precision of signal strength
-    int averageSignalStrength = TOTAL_SIGNAL_STRENGTH * 10  / SIGNALER_MEMBER_COUNT;
+    int averageSignalStrength = TOTAL_SIGNAL_STRENGTH * 10  / SIGNALER_COUNT;
     // int averageSignalStrength = TOTAL_SIGNAL_STRENGTH * 1000 / SIGNALER_MEMBER_COUNT;
     int flux = abs(averageSignalStrength - PREV_AVG_SIGNAL_STRENGTH);
     buffer[0] =  flux;

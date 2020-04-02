@@ -1,10 +1,12 @@
 #include "MicroBit.h"
 
 // MicroBit final global variables
-int MICROBIT_SLEEP_INTERVAL = 1000;
+#define MICROBIT_SLEEP_INTERVAL 1000
 
-int TOTAL_RATE_OF_CHANGE = 0;
-int SIGNALER_MEMBER_COUNT = 0;
+int CHANGED_COUNT = 0;
+int BUFF_AVG_FLUX = 0;
+int RAW_TOTAL_FLUX = 0;
+int SIGNALER_COUNT = 0;
 
 MicroBitImage ICON_BOX("255,255,255,255,255\n255,255,255,255,255\n255,255,255,255,255\n255,255,255,255,255\n255,255,255,255,255\n");
 
@@ -26,15 +28,27 @@ int main()
     uBit.display.print("L");
 
     while (true) {
-        SIGNALER_MEMBER_COUNT = 0;
-        TOTAL_RATE_OF_CHANGE = 0;
+        SIGNALER_COUNT = 0;
+        RAW_TOTAL_FLUX = 0;
 
         uBit.sleep(MICROBIT_SLEEP_INTERVAL);
 
-        // uBit.serial.printf("FLUX:%d %d \r\n",
-        //         TOTAL_RATE_OF_CHANGE / SIGNALER_MEMBER_COUNT,
-        //         SIGNALER_MEMBER_COUNT);
-        if (TOTAL_RATE_OF_CHANGE / SIGNALER_MEMBER_COUNT >= 10) {
+        int newAvgFlux = RAW_TOTAL_FLUX / SIGNALER_COUNT;
+
+        // Detect changes to flux level
+        if (abs(newAvgFlux - BUFF_AVG_FLUX) > 2) {
+            CHANGED_COUNT++;
+        } else {
+            CHANGED_COUNT = 0;
+        }
+
+        // Accept a change in buffered flux if more than one changed data point
+        if (CHANGED_COUNT > 1) {
+            CHANGED_COUNT = 0;
+            BUFF_AVG_FLUX = newAvgFlux;
+        }
+
+        if (BUFF_AVG_FLUX > 10) {
             uBit.display.print(ICON_BOX);
         } else {
             uBit.display.print("");
@@ -46,8 +60,7 @@ void onDataChannel2(MicroBitEvent) {
     PacketBuffer buffer = uBit.radio.datagram.recv();
     // Signal Strength range: 0 - 86
     int rateOfChange = buffer[0];
-    TOTAL_RATE_OF_CHANGE += rateOfChange;
-    SIGNALER_MEMBER_COUNT++;
+    RAW_TOTAL_FLUX += rateOfChange;
+    SIGNALER_COUNT++;
     // uBit.serial.printf("%d:%d \r\n", SIGNALER_MEMBER_COUNT, rateOfChange);
-
 }
