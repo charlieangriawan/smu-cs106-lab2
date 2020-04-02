@@ -20,8 +20,6 @@ void sendFluxData();
 
 MicroBit uBit;
 
-int INTERVAL_ID = 0;
-
 int main()
 {
     uBit.init();
@@ -46,7 +44,8 @@ int main()
         broadcastBaseSignal();
         sendFluxData();
 
-        INTERVAL_ID++;
+        uBit.serial.printf("TOTAL: %d, SIGNAL: %d\r\n",
+                TOTAL_SIGNAL_STRENGTH, SIGNALER_COUNT);
     }
 }
 
@@ -57,7 +56,8 @@ void onDataChannel1(MicroBitEvent) {
     int signalStrength =  128 + buffer.getRSSI();
 
     TOTAL_SIGNAL_STRENGTH += signalStrength;
-    SIGNALER_COUNT++;
+    // buffer[0] represents sender's signaler count
+    SIGNALER_COUNT = max(++SIGNALER_COUNT, buffer[0]);
 
     // uBit.serial.printf("%d\r\n", SIGNALER_MEMBER_COUNT);
 }
@@ -73,10 +73,9 @@ void incrementInterval(MicroBitEvent) {
 }
 
 void broadcastBaseSignal() {
-
     PacketBuffer buffer(1);
 
-    buffer[0] = 0;
+    buffer[0] = SIGNALER_COUNT;
     uBit.radio.datagram.send(buffer);
 }
 
