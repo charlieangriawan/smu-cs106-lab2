@@ -2,7 +2,7 @@
 
 // MicroBit final global variables
 #define MICROBIT_SLEEP_INTERVAL 1000
-#define FLUX_THRESHOLD 100
+#define FLUX_THRESHOLD 120
 
 int CHANGED_COUNT = 0;
 int BUFF_AVG_FLUX = 0;

@@ -45,9 +45,6 @@ int main()
 
         broadcastBaseSignal();
         sendFluxData();
-
-        uBit.serial.printf("TOTAL: %d, SIGNAL: %d\r\n",
-                TOTAL_SIGNAL_STRENGTH, SIGNALER_COUNT);
     }
 }
 
@@ -58,6 +55,7 @@ void onDataChannel1(MicroBitEvent) {
     int signalStrength =  128 + buffer.getRSSI();
 
     TOTAL_SIGNAL_STRENGTH += signalStrength;
+
     SIGNALER_COUNT++;
     // buffer[0] represents sender's signaler count
     REPORTED_SIGNALER_COUNT = max(REPORTED_SIGNALER_COUNT, buffer[0]);
@@ -78,28 +76,34 @@ void incrementInterval(MicroBitEvent) {
 void broadcastBaseSignal() {
     PacketBuffer buffer(1);
 
+    // Store signaler count in base signal
     buffer[0] = SIGNALER_COUNT;
     uBit.radio.datagram.send(buffer);
 }
 
 void sendFluxData() {
-    uBit.radio.setGroup(RADIO_CHANNEL_2);
 
     PacketBuffer buffer(1);
 
     int maxSignalerCount = max(SIGNALER_COUNT, REPORTED_SIGNALER_COUNT);
+
     // increase precision of signal strength
-    int averageSignalStrength = TOTAL_SIGNAL_STRENGTH * 10  / maxSignalerCount;
-    // int averageSignalStrength = TOTAL_SIGNAL_STRENGTH * 1000 / SIGNALER_MEMBER_COUNT;
-    int flux = abs(averageSignalStrength - PREV_AVG_SIGNAL_STRENGTH);
+    int avgSigStrength = TOTAL_SIGNAL_STRENGTH * 10 / maxSignalerCount;
+
+    int flux = abs(avgSigStrength - PREV_AVG_SIGNAL_STRENGTH);
+
     buffer[0] =  flux;
 
-    uBit.serial.printf("%d\r\n", flux);
+    uBit.serial.printf("FLUX: %d, ", flux);
+    uBit.serial.printf("TOTAL: %d, CURR_AVG: %d, PREV_AVG: %d, COUNT: %d, REP: %d\r\n",
+            TOTAL_SIGNAL_STRENGTH, avgSigStrength, PREV_AVG_SIGNAL_STRENGTH,
+            SIGNALER_COUNT, REPORTED_SIGNALER_COUNT);
 
+    uBit.radio.setGroup(RADIO_CHANNEL_2);
     uBit.radio.datagram.send(buffer);
+    uBit.radio.setGroup(RADIO_CHANNEL_1);
 
-    PREV_AVG_SIGNAL_STRENGTH = averageSignalStrength;
+    PREV_AVG_SIGNAL_STRENGTH = avgSigStrength;
 
     // reset uBit to channel 1 for broadcast and listen of channel 1 (base signal)
-    uBit.radio.setGroup(RADIO_CHANNEL_1);
 }
