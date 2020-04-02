@@ -1,7 +1,7 @@
 #include "MicroBit.h"
 
 // uBit final global variables
-int const MICROBIT_SLEEP_INTERVAL = 500;
+int MICROBIT_SLEEP_INTERVAL = 500;
 
 int TOTAL_SIGNAL_STRENGTH = 0;
 int SIGNALER_COUNT = 0;
@@ -12,6 +12,8 @@ int RADIO_CHANNEL_1 = 101;
 int RADIO_CHANNEL_2 = 202;
 
 void onDataChannel1(MicroBitEvent);
+void decrementInterval(MicrobitEvent);
+void incrementInterval(MicrobitEvent);
 
 void broadcastBaseSignal();
 void sendFluxData();
@@ -25,6 +27,8 @@ int main()
     uBit.init();
 
     uBit.messageBus.listen(MICROBIT_ID_RADIO, MICROBIT_RADIO_EVT_DATAGRAM, onDataChannel1);
+    uBit.messageBus.listen(MICROBIT_ID_BUTTON_A, MICROBIT_BUTTON_EVT_DOWN, decrementInterval);
+    uBit.messageBus.listen(MICROBIT_ID_BUTTON_B, MICROBIT_BUTTON_EVT_DOWN, incrementInterval);
 
     uBit.radio.enable();
     uBit.radio.setTransmitPower(7);
@@ -56,6 +60,16 @@ void onDataChannel1(MicroBitEvent) {
     SIGNALER_COUNT++;
 
     // uBit.serial.printf("%d\r\n", SIGNALER_MEMBER_COUNT);
+}
+
+void decrementInterval(MicrobitEvent) {
+    MICROBIT_SLEEP_INTERVAL -= 50;
+    uBit.display.scroll(MICROBIT_SLEEP_INTERVAL);
+}
+
+void incrementInterval(MicrobitEvent) {
+    MICROBIT_SLEEP_INTERVAL += 50;
+    uBit.display.scroll(MICROBIT_SLEEP_INTERVAL);
 }
 
 void broadcastBaseSignal() {
