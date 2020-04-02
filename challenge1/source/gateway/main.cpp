@@ -51,7 +51,8 @@ void _displayIcons(bool help, bool inactive) {
     if (help) {
         uBit.display.print(ICON_HELP);
         uBit.sleep(MICROBIT_SLEEP_INTERVAL/2);
-    } if (inactive) {
+    }
+    if (inactive) {
         uBit.display.print(ICON_INACTIVE);
     }
 }

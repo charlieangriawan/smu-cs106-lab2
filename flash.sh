@@ -8,7 +8,7 @@ if [ "$challenge" = "challenge1" ]; then
         exit 1
     fi
 elif [ "$challenge" = "challenge2" ]; then
-    if [ "$module" != "walker" ]; then
+    if [ "$module" != "leader" ] && [ "$module" != "member" ]; then
         echo "FlashError: invalid module"
         exit 1
     fi
