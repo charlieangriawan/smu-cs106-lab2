@@ -5,6 +5,7 @@ int MICROBIT_SLEEP_INTERVAL = 500;
 
 int TOTAL_SIGNAL_STRENGTH = 0;
 int SIGNALER_COUNT = 0;
+int REPORTED_SIGNALER_COUNT = 0;
 
 int PREV_AVG_SIGNAL_STRENGTH = 0;
 
@@ -37,6 +38,7 @@ int main()
 
     while (true) {
         SIGNALER_COUNT = 0;
+        REPORTED_SIGNALER_COUNT = 0;
         TOTAL_SIGNAL_STRENGTH = 0;
 
         uBit.sleep(MICROBIT_SLEEP_INTERVAL);
@@ -56,8 +58,9 @@ void onDataChannel1(MicroBitEvent) {
     int signalStrength =  128 + buffer.getRSSI();
 
     TOTAL_SIGNAL_STRENGTH += signalStrength;
+    SIGNALER_COUNT++;
     // buffer[0] represents sender's signaler count
-    SIGNALER_COUNT = max(++SIGNALER_COUNT, buffer[0]);
+    REPORTED_SIGNALER_COUNT = max(REPORTED_SIGNALER_COUNT, buffer[0]);
 
     // uBit.serial.printf("%d\r\n", SIGNALER_MEMBER_COUNT);
 }
@@ -84,8 +87,9 @@ void sendFluxData() {
 
     PacketBuffer buffer(1);
 
+    int maxSignalerCount = max(SIGNALER_COUNT, REPORTED_SIGNALER_COUNT);
     // increase precision of signal strength
-    int averageSignalStrength = TOTAL_SIGNAL_STRENGTH * 10  / SIGNALER_COUNT;
+    int averageSignalStrength = TOTAL_SIGNAL_STRENGTH * 10  / maxSignalerCount;
     // int averageSignalStrength = TOTAL_SIGNAL_STRENGTH * 1000 / SIGNALER_MEMBER_COUNT;
     int flux = abs(averageSignalStrength - PREV_AVG_SIGNAL_STRENGTH);
     buffer[0] =  flux;
