@@ -2,6 +2,7 @@
 
 // MicroBit final global variables
 #define MICROBIT_SLEEP_INTERVAL 1000
+#define FLUX_THRESHOLD 100
 
 int CHANGED_COUNT = 0;
 int BUFF_AVG_FLUX = 0;
@@ -9,6 +10,7 @@ int RAW_TOTAL_FLUX = 0;
 int SIGNALER_COUNT = 0;
 
 MicroBitImage ICON_BOX("255,255,255,255,255\n255,255,255,255,255\n255,255,255,255,255\n255,255,255,255,255\n255,255,255,255,255\n");
+MicroBitImage BLANK_BOX("0,0,0,0,0\n0,0,0,0,0\n0,0,0,0,0\n0,0,0,0,0\n0,0,0,0,0\n");
 
 
 MicroBit uBit;
@@ -28,15 +30,16 @@ int main()
     uBit.display.print("L");
 
     while (true) {
+        long prevTime = uBit.systemTime();
         SIGNALER_COUNT = 0;
         RAW_TOTAL_FLUX = 0;
 
         uBit.sleep(MICROBIT_SLEEP_INTERVAL);
 
-        int newAvgFlux = RAW_TOTAL_FLUX / SIGNALER_COUNT;
+        int newAvgFlux = RAW_TOTAL_FLUX * 10 / SIGNALER_COUNT;
 
         // Detect changes to flux level
-        if (abs(newAvgFlux - BUFF_AVG_FLUX) > 2) {
+        if (abs(newAvgFlux - BUFF_AVG_FLUX) > 3) {
             CHANGED_COUNT++;
         } else {
             CHANGED_COUNT = 0;
@@ -48,11 +51,15 @@ int main()
             BUFF_AVG_FLUX = newAvgFlux;
         }
 
-        if (BUFF_AVG_FLUX > 10) {
+        if (BUFF_AVG_FLUX >= FLUX_THRESHOLD) {
             uBit.display.print(ICON_BOX);
         } else {
-            uBit.display.print("");
+            uBit.display.print(BLANK_BOX);
         }
+
+        // uBit.serial.printf("new flux: %d, BUFF FLUX: %d\r\n", newAvgFlux, BUFF_AVG_FLUX);
+        uBit.serial.printf("AVG: %d, COUNT: %d, TIME: %lu\r\n",
+                newAvgFlux, SIGNALER_COUNT, uBit.systemTime() - prevTime);
     }
 }
 
@@ -62,5 +69,5 @@ void onDataChannel2(MicroBitEvent) {
     int rateOfChange = buffer[0];
     RAW_TOTAL_FLUX += rateOfChange;
     SIGNALER_COUNT++;
-    // uBit.serial.printf("%d:%d \r\n", SIGNALER_MEMBER_COUNT, rateOfChange);
+    // uBit.serial.printf("%d:%d \r\n", SIGNALER_COUNT, rateOfChange);
 }
