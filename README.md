@@ -14,7 +14,7 @@
 
 #### Challenge 1. You don’t know our pain
 
-A charity caring for homeless persons in Singapore 1 is keen to adopt technology for their work. You
+A charity caring for homeless persons in Singapore is keen to adopt technology for their work. You
 decide to help this charity deploy a monitoring system at a deserted place where a homeless person
 sleeps. The system comprises several sensors that send data to a gateway. In a real system (but not
 required for this challenge), the gateway sends data to the cloud, where it can be further processed.
