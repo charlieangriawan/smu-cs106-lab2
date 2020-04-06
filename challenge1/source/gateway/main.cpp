@@ -2,7 +2,7 @@
 
 // Microbit final global variables
 int MICROBIT_SLEEP_INTERVAL = 1000;
-int LIGHTLEVEL_TRESHOLD = 128;
+int LIGHTLEVEL_TRESHOLD = 20;
 int INACTIVITY_TRESHOLD = 600;
 MicroBitImage ICON_HELP("255,255,0,255,255\n0,255,0,255,0\n0,0,0,0,0\n0,255,255,255,0\n255,0,0,0,255\n");
 MicroBitImage ICON_INACTIVE("0,255,0,255,0\n0,255,0,255,0\n0,255,0,255,0\n0,0,0,0,0\n0,255,0,255,0\n");
@@ -64,6 +64,9 @@ void processStateUpdate() {
         if (MOTION_UNDETECTED_CYCLECOUNT > 5) inactive = true;
     } else uBit.display.clear();
     if (!IS_NIGHT && MOTION_UNDETECTED_CYCLECOUNT > INACTIVITY_TRESHOLD) inactive = true;
+
+    uBit.serial.printf("N: %d M: %d\r\n", IS_NIGHT, MOTION_UNDETECTED_CYCLECOUNT);
+
     _displayIcons(help, inactive);
 }
 
