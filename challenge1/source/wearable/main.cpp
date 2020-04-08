@@ -1,3 +1,6 @@
+/*
+ * Challenge 1 Wearable
+ */
 #include "MicroBit.h"
 
 // Microbit global variables

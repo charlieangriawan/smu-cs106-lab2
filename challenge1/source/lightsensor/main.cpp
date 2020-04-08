@@ -1,3 +1,6 @@
+/*
+ * Challenge 1 Light Sensor
+ */
 #include "MicroBit.h"
 
 // Microbit global variables
@@ -13,7 +16,7 @@ int main()
     uBit.display.print("L");
     while (true) {
         unsigned char lightLevel = uBit.display.readLightLevel();
-        
+
         PacketBuffer buffer(1);
         buffer[0] = lightLevel;
 

@@ -1,3 +1,6 @@
+/*
+ * Challenge 1 Gateway
+ */
 #include "MicroBit.h"
 
 // Microbit final global variables

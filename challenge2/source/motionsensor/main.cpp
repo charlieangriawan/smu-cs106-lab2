@@ -1,3 +1,6 @@
+/*
+ * Challenge 2
+ */
 #include "MicroBit.h"
 
 #define MICROBIT_SLEEP_INTERVAL     200
@@ -103,7 +106,7 @@ void displayLEDIndicator() {
 
     if (IS_LEADER) strcat(indicatorString, LEADER);
     else strcat(indicatorString, MEMBER);
-    
+
     strcat(indicatorString, EMPTY);
 
     if (BROADCAST_CHANNEL == 1) strcat(indicatorString, CHANNEL1);
