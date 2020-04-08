@@ -65,8 +65,6 @@ void processStateUpdate() {
     } else uBit.display.clear();
     if (!IS_NIGHT && MOTION_UNDETECTED_CYCLECOUNT > INACTIVITY_TRESHOLD) inactive = true;
 
-    uBit.serial.printf("N: %d M: %d\r\n", IS_NIGHT, MOTION_UNDETECTED_CYCLECOUNT);
-
     _displayIcons(help, inactive);
 }
 
