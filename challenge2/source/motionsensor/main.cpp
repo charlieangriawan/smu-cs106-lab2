@@ -3,8 +3,9 @@
 #define MICROBIT_SLEEP_INTERVAL     200
 #define TRANSMIT_POWER              7
 #define TRANSMIT_FREQUENCY          10
-#define MOTION_THRESHOLD            10
+#define MOTION_THRESHOLD            5
 #define MOTION_BUFFER_THRESHOLD     5
+#define DISPLAY_BUFFER_THRESHOLD    5
 #define RADIO_BROADCAST_KEY         111
 #define RADIO_REPORT_KEY            122
 #define EMPTY                       "0,0,0,0,0\n0,0,0,0,0\n0,0,0,0,0\n"
@@ -18,11 +19,15 @@
 #define CHANNEL5                    "0,0,0,0,255\n"
 #define REPORT_CHANNEL              10
 
+MicroBitImage ICON_UNLIT("0,0,0,0,0\n0,0,0,0,0\n0,0,0,0,0\n0,0,0,0,0\n0,0,0,0,0\n");
+MicroBitImage ICON_LIT("255,255,255,255,255\n255,255,255,255,255\n255,255,255,255,255\n255,255,255,255,255\n255,255,255,255,255\n");
+
 uint8_t BROADCAST_CHANNEL = 0;
 bool IS_LEADER = false;
 int PREV_SIGNAL_STRENGTH = 0;
 bool MOTION_DETECTED = true;
 int MOTION_BUFFER_CYCLE = MOTION_BUFFER_THRESHOLD;
+int DISPLAY_BUFFER_CYCLE = DISPLAY_BUFFER_THRESHOLD;
 
 void reinitializeGlobalTempVariables() {
     MOTION_DETECTED = false;
@@ -58,9 +63,16 @@ int main()
 
         if (BROADCAST_CHANNEL != 0) broadcastSignal();
 
-        displayLEDIndicator();
+        if (DISPLAY_BUFFER_CYCLE < DISPLAY_BUFFER_THRESHOLD) displayLEDIndicator();
+        else if (IS_LEADER) {
+            if (MOTION_DETECTED || (0 < MOTION_BUFFER_CYCLE && MOTION_BUFFER_CYCLE <= MOTION_BUFFER_THRESHOLD)) uBit.display.print(ICON_LIT);
+            else uBit.display.print(ICON_UNLIT);
+        } else {
+            uBit.display.print(ICON_UNLIT);
+        }
 
         MOTION_BUFFER_CYCLE++;
+        DISPLAY_BUFFER_CYCLE++;
     }
 }
 
@@ -79,22 +91,20 @@ void _selfAssignLeadership() {
 }
 
 void handleButtonEvents(MicroBitEvent e) {
+    if (e.source == MICROBIT_ID_RADIO) return;
+    DISPLAY_BUFFER_CYCLE = 0;
     if (e.source == MICROBIT_ID_BUTTON_AB && e.value == MICROBIT_BUTTON_EVT_HOLD) _selfAssignLeadership();
     else if (e.source == MICROBIT_ID_BUTTON_A && e.value == MICROBIT_BUTTON_EVT_CLICK) _decrementChannel();
     else if (e.source == MICROBIT_ID_BUTTON_B && e.value == MICROBIT_BUTTON_EVT_CLICK) _incrementChannel();
 }
 
 void displayLEDIndicator() {
-    char indicatorString[100] = "";
+    char indicatorString[101] = "";
 
-    if (IS_LEADER) {
-        strcat(indicatorString, LEADER);
-        if (MOTION_DETECTED || (0 < MOTION_BUFFER_CYCLE && MOTION_BUFFER_CYCLE <= MOTION_BUFFER_THRESHOLD)) strcat(indicatorString, FULL);
-        else strcat(indicatorString, EMPTY);
-    } else {
-        strcat(indicatorString, MEMBER);
-        strcat(indicatorString, EMPTY);
-    }
+    if (IS_LEADER) strcat(indicatorString, LEADER);
+    else strcat(indicatorString, MEMBER);
+    
+    strcat(indicatorString, EMPTY);
 
     if (BROADCAST_CHANNEL == 1) strcat(indicatorString, CHANNEL1);
     else if (BROADCAST_CHANNEL == 2) strcat(indicatorString, CHANNEL2);
@@ -115,7 +125,6 @@ void broadcastSignal() {
 
 void _processBroadcastMessage(PacketBuffer buffer) {
     int signalStrength =  128 + buffer.getRSSI();
-    uBit.serial.printf("BROADCAST: %d\r\n", signalStrength);
 
     int flux = abs(PREV_SIGNAL_STRENGTH - signalStrength);
     if (flux > MOTION_THRESHOLD) reportSignalDisruption();
