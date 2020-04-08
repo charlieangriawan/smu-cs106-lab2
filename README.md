@@ -58,9 +58,9 @@ In our implementation, we require one and only one micro:bit to take up the role
 
 `ssi` - radio signal strength - the received signal strength indicator (RSSI)
 
-`flux` - radio signal fluctuation - the rate of change of the signal strength on a given interval
+`flux` - radio signal fluctuation - the rate of change of the signal strength on a given interval 
 
-**Customizable variables:**
+<a name="radiosensitivity">**Customizable variables:**</a>
 
 The variables below are changeable to increase/decrease motion detection sensitivity
 
@@ -104,9 +104,16 @@ $ cp [hexfile_path] [microbit_path]
 ```
 
 4. Set the micro:bits equally spaced along the circumference of a circle using the following setup
-5. You could set up micro:bits from 2 - 8 micro:bits (you might need to adjust the `variables` when working with lesser micro:bits)
+5. **You could set up 2, 4 , 6 or 8 micro:bits** for the system to be able to detect motion correctly. However, you will need to adjust the [`customizable variables`](#radiosensitivity) change its sensitivity when working with lesser micro:bits. The lesser your micro:bits in the network, the smaller `MOTION_THRESHOLD` you should set.
 
+| Number of micro:bits | MOTION_THRESHOLD |
+| -------------------- | ---------------- |
+| 2                    | 1                |
+| 4                    | 2                |
+| 6                    | 3                |
+| 8                    | 4                |
 
+Dynamic detection of micro:bit members are not implemented because it is out of the project scope. However, it would be an interesting feature to have.
 
 #### Setting up micro:bits
 
@@ -172,9 +179,9 @@ When leader micro:bit detect a motion, it should light up all its LEDs
 
 
 
-#### Laying out micro:bits (Tested up to 8 micro:bits)
+#### Laying out micro:bits (8 micro:bits)
 
-As per the requirement, micro:bits are to be spaced equally along the circumference of a circle. After flashing up the micro:bits, you will then need to set up each micro:bits to its role and channel.
+As per the requirement, micro:bits are to be spaced equally along the circumference of a circle. After flashing up the micro:bits, you will then need to set up each micro:bits to its role and channel. 
 
 1. On **micro:bit 1**, hold `button_a` and `button_b` together to assign itself to a leader
 2. On **micro:bit 1** and **micro:bit 2 (opposite to micro:bit 1)**  , press `button_a` 1 time to set the micro:bit to listen to channel 1
