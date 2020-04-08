@@ -3,7 +3,7 @@
 #define MICROBIT_SLEEP_INTERVAL     200
 #define TRANSMIT_POWER              7
 #define TRANSMIT_FREQUENCY          10
-#define MOTION_THRESHOLD            5
+#define MOTION_THRESHOLD            4
 #define MOTION_BUFFER_THRESHOLD     5
 #define DISPLAY_BUFFER_THRESHOLD    5
 #define RADIO_BROADCAST_KEY         111
